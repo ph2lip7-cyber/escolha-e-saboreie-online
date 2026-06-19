@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Escolha & Saboreie</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fff8f0;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 { color: #d35400; }
+    .logo { text-align: center; margin-bottom: 20px; }
+    .logo img { width: 180px; border-radius: 10px; }
+    form {
+      max-width: 700px; margin: 0 auto; text-align: left;
+      background: #ffffff; padding: 20px; border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h3 { color: #2c3e50; margin-top: 20px; }
+    label { display: block; margin: 5px 0; }
+    input[type="text"], input[type="datetime-local"], select {
+      width: 100%; padding: 8px; margin: 5px 0 15px 0;
+      border: 1px solid #ccc; border-radius: 5px;
+    }
+    button {
+      background-color: #25d366; color: white; border: none;
+      padding: 12px 20px; font-size: 16px; border-radius: 5px;
+      cursor: pointer; margin-top: 20px;
+    }
+    button:hover { background-color: #1ebe5d; }
+  </style>
+</head>
+<body>
+  <div class="logo">
+    <img src="logo.jpeg" alt="Logo Escolha & Saboreie">
+  </div>
+
+  <h1>🍝 Escolha & Saboreie</h1>
+  <p>Monte seu macarrão por R$ 34.99</p>
+  <p style="color:red; font-weight:bold;">
+    ⚠️ Atenção: Cada adicional extra (molho acima de 1, proteína acima de 1 ou adicionais acima de 3) custa R$ 5.00
+  </p>
+
+  <form id="pastaForm">
+    <h3>1. Massa</h3>
+    <label><input type="radio" name="massa" value="Penne" required> Penne</label>
+    <label><input type="radio" name="massa" value="Espaguete"> Espaguete</label>
+    <label><input type="radio" name="massa" value="Ninho"> Ninho</label>
+
+    <h3>2. Molhos</h3>
+    <label><input type="checkbox" name="molho" value="Tradicional (Tomate)"> Tradicional (Tomate)</label>
+    <label><input type="checkbox" name="molho" value="Branco"> Branco</label>
+    <label><input type="checkbox" name="molho" value="Rosé"> Rosé</label>
+
+    <h3>3. Adicionais</h3>
+    <label><input type="checkbox" name="adicional" value="Presunto"> Presunto</label>
+    <label><input type="checkbox" name="adicional" value="Queijo"> Queijo</label>
+    <label><input type="checkbox" name="adicional" value="Catupiry"> Catupiry</label>
+    <label><input type="checkbox" name="adicional" value="Cheddar"> Cheddar</label>
+    <label><input type="checkbox" name="adicional" value="Bacon"> Bacon</label>
+    <label><input type="checkbox" name="adicional" value="Milho"> Milho</label>
+    <label><input type="checkbox" name="adicional" value="Azeitona"> Azeitona</label>
+
+    <h3>4. Erva</h3>
+    <label><input type="radio" name="erva" value="Oregano" required> Oregano</label>
+    <label><input type="radio" name="erva" value="Salsinha"> Salsinha</label>
+    <label><input type="radio" name="erva" value="Cebolinha"> Cebolinha</label>
+    <label><input type="radio" name="erva" value="Manjericao"> Manjericao</label>
+
+    <h3>5. Proteinas</h3>
+    <label><input type="checkbox" name="proteina" value="Frango Desfiado"> Frango Desfiado</label>
+    <label><input type="checkbox" name="proteina" value="Carne Moida"> Carne Moida</label>
+    <label><input type="checkbox" name="proteina" value="Calabresa"> Calabresa</label>
+    <label><input type="checkbox" name="proteina" value="Salsicha"> Salsicha</label>
+
+    <h3>6. Dados do Cliente</h3>
+    <label>Endereco:</label>
+    <input type="text" id="endereco" required>
+    <label>Data e Hora:</label>
+    <input type="datetime-local" id="dataHora" required>
+    <label>Forma de Pagamento:</label>
+    <select id="pagamento" required>
+      <option value="">Selecione</option>
+      <option value="Dinheiro">Dinheiro</option>
+      <option value="Cartao">Cartao</option>
+      <option value="Pix">Pix</option>
+    </select>
+
+    <button type="button" onclick="enviarPedido()">📲 Enviar pedido pelo WhatsApp</button>
+  </form>
+
+  <script>
+    function formatarDataHora(valor) {
+      const data = new Date(valor);
+      const dia = String(data.getDate()).padStart(2, '0');
+      const mes = String(data.getMonth() + 1).padStart(2, '0');
+      const ano = data.getFullYear();
+      const hora = String(data.getHours()).padStart(2, '0');
+      const minuto = String(data.getMinutes()).padStart(2, '0');
+      return `${dia}/${mes}/${ano} ${hora}:${minuto}`;
+    }
+
+    function enviarPedido() {
+      const form = document.getElementById("pastaForm");
+      const massa = form.massa.value;
+      const erva = form.erva.value;
+      const endereco = document.getElementById("endereco").value;
+      const dataHora = document.getElementById("dataHora").value;
+      const pagamento = document.getElementById("pagamento").value;
+
+      const molhos = Array.from(form.querySelectorAll('input[name="molho"]:checked')).map(el => el.value);
+      const proteinas = Array.from(form.querySelectorAll('input[name="proteina"]:checked')).map(el => el.value);
+      const adicionais = Array.from(form.querySelectorAll('input[name="adicional"]:checked')).map(el => el.value);
+
+      if (!massa || molhos.length === 0 || !erva || proteinas.length === 0 || !endereco || !dataHora || !pagamento) {
+        alert("Por favor, preencha todas as opcoes obrigatorias.");
+        return;
+      }
+
+      let extras = 0;
+      let extrasDetalhes = [];
+
+      if (molhos.length > 1) {
+        extras += molhos.length - 1;
+        extrasDetalhes.push("🔸 Molhos extras: " + molhos.slice(1).join(", "));
+      }
+      if (adicionais.length > 3) {
+        extras += adicionais.length - 3;
+        extrasDetalhes.push("🔸 Adicionais extras: " + adicionais.slice(3).join(", "));
+      }
+      if (proteinas.length > 1) {
+        extras += proteinas.length - 1;
+        extrasDetalhes.push("🔸 Proteinas extras: " + proteinas.slice(1).join(", "));
+      }
+
+      const valorBase = 34.99;
+      const valorExtras = extras * 5;
+      const valorFinal = valorBase + valorExtras;
+
+      const mensagem = `🍝 Escolha & Saboreie
+🏢 CNPJ: 67.158.391/0001-48
+📅 Data/Hora: ${formatarDataHora(dataHora)}
+
+📋 Pedidos:
+Massa: ${massa}
+Molho: ${molhos.join(", ")}
+Adicionais: ${adicionais.join(", ")}
+Erva: ${erva}
+Proteina: ${proteinas.join(", ")}
+Extras cobrados: ${extras} (R$ ${valorExtras.toFixed(2)})
+${extrasDetalhes.join("\n")}
+Valor base: R$ ${valorBase}
+Valor final: R$ ${valorFinal.toFixed(2)}
+
+💳 Pagamento: ${pagamento}
+📍 Endereco: ${endereco}
+
+Deus lhe abencoe volte sempre!`;
+
+    const numero = "12988682328";
+    const url = `https://api.whatsapp.com/send?phone=${numero}&text=${encodeURIComponent(mensagem)}`;
+    window.open(url, "_blank");
+
+    alert("✅ Seu pedido foi enviado com sucesso! Agora é so aguardar a confirmacao da empresa.");
+  }
+</script>

@@ -21,7 +21,7 @@
     }
     h3 { color: #2c3e50; margin-top: 20px; }
     label { display: block; margin: 5px 0; }
-    input[type="text"], input[type="datetime-local"], select {
+    input[type="text"], input[type="datetime-local"], input[type="number"], select {
       width: 100%; padding: 8px; margin: 5px 0 15px 0;
       border: 1px solid #ccc; border-radius: 5px;
     }
@@ -63,21 +63,41 @@
     <label><input type="checkbox" name="adicional" value="Bacon"> Bacon</label>
     <label><input type="checkbox" name="adicional" value="Milho"> Milho</label>
     <label><input type="checkbox" name="adicional" value="Azeitona"> Azeitona</label>
+    <label><input type="checkbox" name="adicional" value="Tomate Cereja"> Tomate Cereja</label>
+    <label><input type="checkbox" name="adicional" value="Alho Frito"> Alho Frito</label>
+    <label><input type="checkbox" name="adicional" value="Brócolis"> Brócolis</label>
 
     <h3>4. Erva</h3>
-    <label><input type="radio" name="erva" value="Oregano" required> Oregano</label>
+    <label><input type="radio" name="erva" value="Orégano" required> Orégano</label>
     <label><input type="radio" name="erva" value="Salsinha"> Salsinha</label>
     <label><input type="radio" name="erva" value="Cebolinha"> Cebolinha</label>
-    <label><input type="radio" name="erva" value="Manjericao"> Manjericao</label>
+    <label><input type="radio" name="erva" value="Manjericão"> Manjericão</label>
 
-    <h3>5. Proteinas</h3>
+    <h3>5. Proteínas</h3>
     <label><input type="checkbox" name="proteina" value="Frango Desfiado"> Frango Desfiado</label>
-    <label><input type="checkbox" name="proteina" value="Carne Moida"> Carne Moida</label>
+    <label><input type="checkbox" name="proteina" value="Carne Moída"> Carne Moída</label>
     <label><input type="checkbox" name="proteina" value="Calabresa"> Calabresa</label>
     <label><input type="checkbox" name="proteina" value="Salsicha"> Salsicha</label>
 
-    <h3>6. Dados do Cliente</h3>
-    <label>Endereco:</label>
+    <!-- Bebidas -->
+    <h3>6. Bebidas (350ml - R$7,00 cada)</h3>
+    <label>Coca-Cola Zero:
+      <input type="number" name="bebidaQtd" data-bebida="Coca-Cola Zero" min="0" value="0">
+    </label>
+    <label>Coca-Cola Tradicional:
+      <input type="number" name="bebidaQtd" data-bebida="Coca-Cola Tradicional" min="0" value="0">
+    </label>
+    <label>Guaraná Zero:
+      <input type="number" name="bebidaQtd" data-bebida="Guaraná Zero" min="0" value="0">
+    </label>
+    <label>Guaraná Normal:
+      <input type="number" name="bebidaQtd" data-bebida="Guaraná Normal" min="0" value="0">
+    </label>
+
+    <h3>7. Dados do Cliente</h3>
+    <label>Nome do Cliente:</label>
+    <input type="text" id="nomeCliente" required>
+    <label>Endereço:</label>
     <input type="text" id="endereco" required>
     <label>Data e Hora:</label>
     <input type="datetime-local" id="dataHora" required>
@@ -85,10 +105,11 @@
     <select id="pagamento" required>
       <option value="">Selecione</option>
       <option value="Dinheiro">Dinheiro</option>
-      <option value="Cartao">Cartao</option>
+      <option value="Cartão">Cartão</option>
       <option value="Pix">Pix</option>
     </select>
 
+    <p><strong>🚚 Taxa de entrega: a consultar</strong></p>
     <button type="button" onclick="enviarPedido()">📲 Enviar pedido pelo WhatsApp</button>
   </form>
 
@@ -107,6 +128,7 @@
       const form = document.getElementById("pastaForm");
       const massa = form.massa.value;
       const erva = form.erva.value;
+      const nomeCliente = document.getElementById("nomeCliente").value;
       const endereco = document.getElementById("endereco").value;
       const dataHora = document.getElementById("dataHora").value;
       const pagamento = document.getElementById("pagamento").value;
@@ -114,9 +136,15 @@
       const molhos = Array.from(form.querySelectorAll('input[name="molho"]:checked')).map(el => el.value);
       const proteinas = Array.from(form.querySelectorAll('input[name="proteina"]:checked')).map(el => el.value);
       const adicionais = Array.from(form.querySelectorAll('input[name="adicional"]:checked')).map(el => el.value);
+      const bebidasSelecionadas = Array.from(form.querySelectorAll('input[name="bebidaQtd"]'))
+        .filter(el => parseInt(el.value) > 0)
+        .map(el => `${el.dataset.bebida} (x${el.value})`);
+      const qtdBebidas = Array.from(form.querySelectorAll('input[name="bebidaQtd"]'))
+        .reduce((total, el) => total + parseInt(el.value || 0), 0);
+      const valorBebidas = qtdBebidas * 7.00;
 
-      if (!massa || molhos.length === 0 || !erva || proteinas.length === 0 || !endereco || !dataHora || !pagamento) {
-        alert("Por favor, preencha todas as opcoes obrigatorias.");
+      if (!massa || molhos.length === 0 || !erva || proteinas.length === 0 || !nomeCliente || !endereco || !dataHora || !pagamento) {
+        alert("Por favor, preencha todas as opções obrigatórias.");
         return;
       }
 
@@ -133,37 +161,53 @@
       }
       if (proteinas.length > 1) {
         extras += proteinas.length - 1;
-        extrasDetalhes.push("🔸 Proteinas extras: " + proteinas.slice(1).join(", "));
+        extrasDetalhes.push("🔸 Proteínas extras: " + proteinas.slice(1).join(", "));
       }
 
       const valorBase = 34.99;
       const valorExtras = extras * 5;
-      const valorFinal = valorBase + valorExtras;
+      const valorFinal = valorBase + valorExtras + valorBebidas;
 
-      const mensagem = `🍝 Escolha & Saboreie
-🏢 CNPJ: 67.158.391/0001-48
-📅 Data/Hora: ${formatarDataHora(dataHora)}
+      const mensagem = `🍝 *Escolha & Saboreie*
+📅 *Data/Hora:* ${formatarDataHora(dataHora)}
 
-📋 Pedidos:
-Massa: ${massa}
-Molho: ${molhos.join(", ")}
-Adicionais: ${adicionais.join(", ")}
-Erva: ${erva}
-Proteina: ${proteinas.join(", ")}
-Extras cobrados: ${extras} (R$ ${valorExtras.toFixed(2)})
+👤 *Nome do Cliente:* ${nomeCliente}
+
+📋 *Pedido:*
+*Massa:* ${massa}
+*Molho:* ${molhos.join(", ")}
+
+*Adicionais:* 
+${adicionais.join(", ")}
+
+*Proteína:* 
+${proteinas.join(", ")}
+
+*Erva:* 
+${erva}
+
+*Bebidas:* 
+${bebidasSelecionadas.join(", ") || "Nenhuma"}
+*Valor bebidas:* R$ ${valorBebidas.toFixed(2)}
+
+*Extras:* ${extras} (R$ ${valorExtras.toFixed(2)})
 ${extrasDetalhes.join("\n")}
-Valor base: R$ ${valorBase}
-Valor final: R$ ${valorFinal.toFixed(2)}
 
-💳 Pagamento: ${pagamento}
-📍 Endereco: ${endereco}
+*Valor base:* R$ ${valorBase}
+*Valor final:* R$ ${valorFinal.toFixed(2)}
 
-Deus lhe abencoe volte sempre!`;
+🚚 *Taxa de entrega:* a consultar
+💳 *Pagamento:* ${pagamento}
+📍 *Endereço:* ${endereco}
 
-    const numero = "12988682328";
-    const url = `https://api.whatsapp.com/send?phone=${numero}&text=${encodeURIComponent(mensagem)}`;
-    window.open(url, "_blank");
+🙏 *Deus lhe abençoe, volte sempre!*`;
 
-    alert("✅ Seu pedido foi enviado com sucesso! Agora é so aguardar a confirmacao da empresa.");
-  }
-</script>
+      const numero = "12988682328"; // número da empresa
+      const url = `https://api.whatsapp.com/send?phone=${numero}&text=${encodeURIComponent(mensagem)}`;
+      window.open(url, "_blank");
+
+      alert("✅ Seu pedido foi enviado com sucesso! Agora é só aguardar a confirmação da empresa.");
+    }
+  </script>
+</body>
+</html>
